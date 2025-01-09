@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
         expiresIn : "30 day",
     });
 
-    return res.status(201).json ({ userObject , accessToken});
+    return res.status(201).json ({ user : userObject , accessToken});
 
 };
 
