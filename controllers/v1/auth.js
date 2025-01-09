@@ -1,6 +1,7 @@
 const userModel = require("./../../models/user"); 
 
 const registerValidation = require("../../validators/register")
+const bcrypt = require("bcrypt");
 
 exports.register = async (req, res) => {
 
@@ -18,7 +19,19 @@ exports.register = async (req, res) => {
             message: "username or email is duplicated",
         })
     }
-    // coding
+    
+    const countOfUsers = await userModel.count();
+    const hashedPass = await bcrypt.hash(password, 10);
+
+    const user = userModel.create({
+        username,
+        name,
+        email,
+        phone,
+        password : hashedPass,
+        role : countOfUsers > 0 ? 'USER' : 'ADMIN',
+    })
+
 };
 
 exports.login = async (req, res) => {};
