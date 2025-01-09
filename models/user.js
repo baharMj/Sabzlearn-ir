@@ -14,7 +14,7 @@ const schema = mongoose.Schema({
         type : String,
         required : true,
     },
-    phonenumber:{
+    phone:{
         type : String,
         required : true,
     },
