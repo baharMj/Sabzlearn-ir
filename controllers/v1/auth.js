@@ -24,7 +24,7 @@ exports.register = async (req, res) => {
     const countOfUsers = await userModel.countDocuments();
     const hashedPass = await bcrypt.hash(password, 10);
 
-    const user = userModel.create({
+    const user = await userModel.create({
         username,
         name,
         email,
@@ -33,11 +33,14 @@ exports.register = async (req, res) => {
         role : countOfUsers > 0 ? 'USER' : 'ADMIN',
     })
 
+    const userObject = user.toObject() ;
+    Reflect.deleteProperty(userObject, "password");
+
     const accessToken = jwt.sign({ id : user._id }, process.env.JWT_SECRET , {
         expiresIn : "30 day",
     });
 
-    return res.status(201).json ({ user, accessToken});
+    return res.status(201).json ({ userObject , accessToken});
 
 };
 
