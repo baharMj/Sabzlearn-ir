@@ -1,4 +1,5 @@
 const userModel = require("./../../models/user"); 
+const banUserModel = require("./../../models/ban-user"); 
 
 const registerValidation = require("../../validators/register")
 const bcrypt = require("bcrypt");
@@ -18,6 +19,13 @@ exports.register = async (req, res) => {
     if (isUserExists){
         return res.status(409).json({
             message: "username or email is duplicated",
+        })
+    }
+
+    const isUserBan = await banUserModel.find({ phone })
+    if (isUserBan.length){
+        return res.status(409).json({
+            message: "phone is Ban!",
         })
     }
     
@@ -44,6 +52,31 @@ exports.register = async (req, res) => {
 
 };
 
-exports.login = async (req, res) => {};
+exports.login = async (req, res) => {
+
+    const { identifier, password } = req.body; 
+
+    const user = await userModel.findOne ({
+        $or : [{ email : identifier }, {username : identifier }],
+    });
+
+    if (!user){
+        return res.status(401).json({
+            message : "username or email is not valid!!"
+        });
+    }
+    const isValidPass = await bcrypt.compare( password , user.password );
+
+    if (!isValidPass){
+        return res.status(401).json({
+            message : "Pass is not valid",
+        });
+    }
+
+    const accessToken = jwt.sign({ id : user._id}, process.env.JWT_SECRET, {
+        expiresIn : "30 days"
+    });
+    return res.status(201).json({ accessToken });
+};
 
 exports.getMe = async (req, res) => {};
